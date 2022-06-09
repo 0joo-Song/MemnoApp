@@ -4,7 +4,12 @@
       <button class="btn btn-primary" @click="add()">+ 추가</button>
     </div>
     <ul>
-      <li v-for="d in state.data" :key="d.id" @click="edit(d.id)">{{ d.content }}</li>
+      <li v-for="d in state.data" :key="d.id">
+        <input type="checkbox" v-model="d.complete" true-value="Y" false-value="N" @change="compMemo(d.id)"/>
+        {{ d.content }}
+        <button id="modBtn" @click="editMemo(d.id)">수정</button>
+        <button id="delBtn" @click="delMemo(d.id)">삭제</button>
+      </li>
     </ul>
   </div>
 </template>
@@ -19,6 +24,7 @@ export default {
       data: [],
     });
 
+    // 메모 추가
     const add = () => {
       const content = prompt("내용을 입력해주세요.");
 
@@ -32,7 +38,8 @@ export default {
       });
     };
 
-    const edit = (id) => {
+    // 메모 수정
+    const editMemo = (id) => {
       const content = prompt("내용을 입력해주세요", state.data.find(d=>d.id === id).content);
 
       axios.put("/api/memos/" + id, { content }).then((res) => {
@@ -40,11 +47,19 @@ export default {
       });
     };
 
-    axios.get("/api/memos").then((res) => {
-      state.data = res.data;
-    });
-
-    return { state, add, edit };
+    // 메모 삭제
+    const delMemo = (id) => {
+      const delCheck = confirm("삭제하시겠습니까?");
+   
+      if(confirm){
+        axios.post("/api/memos/delMemo/" + id).then((res) => {
+          state.data = res.data;
+        });
+      }else{
+        return false;
+      }
+    };
+    return { state, add, editMemo, delMemo,  };
   },
 };
 </script>
@@ -65,6 +80,13 @@ export default {
       padding: 15px;
       margin: 10px 0;
       border: 1px solid #eee;
+        button{
+          margin-left:5px;
+          border:none;
+          color: white;
+          background-color:rgb(83, 174, 254)
+          
+        }
     }
   }
 }
